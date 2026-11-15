@@ -54,8 +54,20 @@
   .row { margin-bottom: 10px; }
   .row label { display: block; font-size: 13px; color: var(--sub); margin-bottom: 4px; font-weight: 600; }
   .inline { display: flex; gap: 8px; }
+  .inline { align-items: stretch; flex-wrap: nowrap; }
+  .stepper { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--card); }
+  .stepper .st {
+    width: 44px; border: 0; background: var(--soft); color: var(--accent);
+    font-size: 24px; font-weight: 700; line-height: 1; padding: 0;
+  }
+  .stepper .st:active { background: var(--accent); color: var(--on-accent); }
+  .stepper input {
+    -moz-appearance: textfield; appearance: textfield;
+  }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .inline input {
-    flex: 1; min-width: 0; font-size: 22px; padding: 8px 10px; text-align: right;
+    flex: 0 0 auto; width: 4.2em; min-width: 0; font-size: 22px; padding: 8px 6px; text-align: center;
+    border-radius: 0 !important; border-top: 0 !important; border-bottom: 0 !important;
     border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--fg);
     font-variant-numeric: tabular-nums;
   }
@@ -122,12 +134,16 @@
     c.innerHTML =
       '<h2><span class="badge">' + eye.id + '</span>' + eye.name + '</h2>' +
       '<div class="row"><label>水平プリズム（X軸）</label><div class="inline">' +
-        '<input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="h">' +
+        '<div class="stepper"><button type="button" class="st" data-t="h" data-d="-1" aria-label="水平を0.25減らす">−</button>' +
+        '<input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="h" id="' + eye.id + '-h">' +
+        '<button type="button" class="st" data-t="h" data-d="1" aria-label="水平を0.25増やす">＋</button></div>' +
         '<span class="unit">Δ</span>' +
         '<div class="seg" data-k="hb"><button type="button" data-v="BI" class="on">BI</button><button type="button" data-v="BO">BO</button></div>' +
       '</div></div>' +
       '<div class="row"><label>垂直プリズム（Y軸）</label><div class="inline">' +
-        '<input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="v">' +
+        '<div class="stepper"><button type="button" class="st" data-t="v" data-d="-1" aria-label="垂直を0.25減らす">−</button>' +
+        '<input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="v" id="' + eye.id + '-v">' +
+        '<button type="button" class="st" data-t="v" data-d="1" aria-label="垂直を0.25増やす">＋</button></div>' +
         '<span class="unit">Δ</span>' +
         '<div class="seg" data-k="vb"><button type="button" data-v="BU" class="on">BU</button><button type="button" data-v="BD">BD</button></div>' +
       '</div></div>' +
@@ -148,6 +164,19 @@
       });
     });
     c.querySelectorAll('input').forEach(function (i) { i.addEventListener('input', update); });
+    // ＋−ボタン：0.25Δずつ増減（0未満にはしない）
+    c.querySelectorAll('.st').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var input = c.querySelector('input[data-k="' + b.getAttribute('data-t') + '"]');
+        var cur = parseFloat(input.value); if (!isFinite(cur) || cur < 0) cur = 0;
+        var next = Math.round(cur * 4) / 4 + 0.25 * parseInt(b.getAttribute('data-d'), 10);
+        if (Math.abs(cur * 4 - Math.round(cur * 4)) > 1e-9 && b.getAttribute('data-d') === '-1') next = Math.floor(cur * 4) / 4;
+        if (Math.abs(cur * 4 - Math.round(cur * 4)) > 1e-9 && b.getAttribute('data-d') === '1') next = Math.ceil(cur * 4) / 4;
+        next = Math.max(0, Math.min(30, next));
+        input.value = next > 0 ? f2(next) : '';
+        update();
+      });
+    });
   });
 
   function get(eye) {
