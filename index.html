@@ -6,304 +6,262 @@
 <meta name="theme-color" content="#1f4e79">
 <title>プリズム合成計算</title>
 <style>
-  :root {
-    --bg: #f3f5f8; --card: #fff; --text: #1d2733; --sub: #66727f;
-    --line: #d6dce3; --accent: #1f4e79; --accent-soft: #e3edf7;
-    --r: #c0392b; --l: #1f6fb5;
-  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0; background: var(--bg); color: var(--text);
+    margin: 0; background: #f3f5f8; color: #1d2733;
     font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
     font-size: 16px;
   }
   header {
-    background: var(--accent); color: #fff; padding: 14px 16px;
-    padding-top: calc(14px + env(safe-area-inset-top));
+    background: #1f4e79; color: #fff; padding: 12px 16px;
+    padding-top: calc(12px + env(safe-area-inset-top));
     display: flex; align-items: center; justify-content: space-between;
   }
   header h1 { font-size: 18px; margin: 0; }
   header button {
-    background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.4);
-    border-radius: 8px; padding: 6px 12px; font-size: 14px;
+    background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.5);
+    border-radius: 8px; padding: 6px 14px; font-size: 14px;
   }
-  main { max-width: 900px; margin: 0 auto; padding: 12px 12px 40px; }
+  main { max-width: 960px; margin: 0 auto; padding: 12px; }
   .eyes { display: grid; grid-template-columns: 1fr; gap: 12px; }
-  @media (min-width: 700px) { .eyes { grid-template-columns: 1fr 1fr; } }
-  .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  @media (min-width: 720px) { .eyes { grid-template-columns: 1fr 1fr; } }
+  .card { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   .card h2 { margin: 0 0 10px; font-size: 17px; display: flex; align-items: center; gap: 8px; }
-  .badge { color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 14px; }
-  .R .badge { background: var(--r); } .L .badge { background: var(--l); }
-  .row { margin-bottom: 12px; }
-  .row label { display: block; font-size: 13px; color: var(--sub); margin-bottom: 4px; }
-  .inline { display: flex; gap: 8px; align-items: stretch; }
-  input[type=number] {
+  .badge { color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 15px; }
+  .R .badge { background: #c0392b; }
+  .L .badge { background: #1f6fb5; }
+  .row { margin-bottom: 10px; }
+  .row label { display: block; font-size: 13px; color: #66727f; margin-bottom: 4px; font-weight: 600; }
+  .inline { display: flex; gap: 8px; }
+  .inline input {
     flex: 1; min-width: 0; font-size: 22px; padding: 8px 10px; text-align: right;
-    border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--text);
+    border: 1px solid #c9d1da; border-radius: 8px; background: #fff; color: #1d2733;
   }
-  input[type=number]:focus { outline: 2px solid var(--accent); border-color: transparent; }
-  .unit { align-self: center; color: var(--sub); }
-  .seg { display: flex; border: 1px solid var(--accent); border-radius: 8px; overflow: hidden; }
+  .unit { align-self: center; color: #66727f; }
+  .seg { display: flex; border: 1px solid #1f4e79; border-radius: 8px; overflow: hidden; }
   .seg button {
-    border: 0; background: #fff; color: var(--accent); font-size: 15px; font-weight: 600;
-    padding: 0 14px; min-width: 56px;
+    border: 0; background: #fff; color: #1f4e79; font-size: 15px; font-weight: 700;
+    padding: 0 12px; min-width: 52px;
   }
-  .seg button + button { border-left: 1px solid var(--accent); }
-  .seg button.on { background: var(--accent); color: #fff; }
-  .result {
-    display: flex; gap: 12px; align-items: center; background: var(--accent-soft);
-    border-radius: 10px; padding: 10px;
-  }
-  .result svg { flex: 0 0 120px; width: 120px; height: 120px; }
-  .result .vals { flex: 1; }
-  .big { font-size: 28px; font-weight: 700; }
-  .big small { font-size: 16px; font-weight: 500; }
-  .meta { font-size: 14px; color: var(--sub); margin-top: 2px; }
-  .total { margin-top: 12px; }
-  .total table { width: 100%; border-collapse: collapse; font-size: 15px; }
-  .total td { padding: 8px 4px; border-bottom: 1px solid var(--line); }
-  .total td:last-child { text-align: right; font-weight: 600; }
-  .note { font-size: 12px; color: var(--sub); margin-top: 10px; line-height: 1.6; }
-  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
-  .tabs button {
-    flex: 1; padding: 10px; font-size: 15px; border-radius: 8px; border: 1px solid var(--accent);
-    background: #fff; color: var(--accent); font-weight: 600;
-  }
-  .tabs button.on { background: var(--accent); color: #fff; }
-  .hidden { display: none !important; }
+  .seg button + button { border-left: 1px solid #1f4e79; }
+  .seg button.on { background: #1f4e79; color: #fff; }
+  svg.graph { display: block; width: 100%; max-width: 360px; margin: 6px auto 0; }
+  .res { background: #e3edf7; border-radius: 10px; padding: 10px 12px; margin-top: 8px; }
+  .res table { width: 100%; border-collapse: collapse; }
+  .res td { padding: 4px 2px; font-size: 15px; }
+  .res td:last-child { text-align: right; font-weight: 700; }
+  .res tr.sum td { border-top: 1px solid #b9c9da; padding-top: 8px; font-size: 20px; }
+  .total table { width: 100%; border-collapse: collapse; }
+  .total td { padding: 8px 2px; border-bottom: 1px solid #e1e6ec; }
+  .total td:last-child { text-align: right; font-weight: 700; }
+  .note { font-size: 12px; color: #66727f; line-height: 1.6; margin-top: 8px; }
 </style>
 </head>
 <body>
 <header>
   <h1>プリズム合成計算</h1>
-  <button id="clear">クリア</button>
+  <button id="clear" type="button">クリア</button>
 </header>
 <main>
-  <div class="tabs">
-    <button data-tab="compose" class="on">合成（水平＋垂直）</button>
-    <button data-tab="split">分解（合成→水平・垂直）</button>
+  <div class="eyes">
+    <div class="card R" id="R"></div>
+    <div class="card L" id="L"></div>
   </div>
-
-  <section id="compose">
-    <div class="eyes" id="eyes"></div>
-    <div class="card total">
-      <h2>両眼の合計</h2>
-      <table>
-        <tr><td>水平（両眼合計）</td><td id="tH">—</td></tr>
-        <tr><td>垂直（上下差）</td><td id="tV">—</td></tr>
-      </table>
-      <div class="note">
-        基底方向は 360°表記（検者側から見て、右方向 0°・反時計回り）。<br>
-        右眼：BI=0° / BU=90° / BO=180° / BD=270°　左眼：BO=0° / BU=90° / BI=180° / BD=270°<br>
-        垂直の上下差は「右BU＝左BD」として合算しています。
-      </div>
+  <div class="card total" style="margin-top:12px">
+    <h2>両眼の合計</h2>
+    <table>
+      <tr><td>水平（両眼合計）</td><td id="tH">—</td></tr>
+      <tr><td>垂直（上下差）</td><td id="tV">—</td></tr>
+    </table>
+    <div class="note">
+      グラフは検者側（正面）から見た向きです。X軸＝水平、Y軸＝垂直。<br>
+      基底方向は360°表記（右0°・上90°・左180°・下270°）。右眼のBIは0°、左眼のBIは180°。<br>
+      垂直の上下差は「右BU＝左BD」として合算しています。
     </div>
-  </section>
-
-  <section id="split" class="hidden">
-    <div class="eyes" id="eyes2"></div>
-    <div class="card"><div class="note">合成プリズム量と基底方向（360°表記）から、水平・垂直の成分に分けます。</div></div>
-  </section>
+  </div>
 </main>
 
-<template id="eyeTpl">
-  <div class="card">
-    <h2><span class="badge"></span><span class="ttl"></span></h2>
-    <div class="row">
-      <label>水平プリズム</label>
-      <div class="inline">
-        <input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="h">
-        <span class="unit">Δ</span>
-        <div class="seg" data-k="hb"><button data-v="BI" class="on">BI</button><button data-v="BO">BO</button></div>
-      </div>
-    </div>
-    <div class="row">
-      <label>垂直プリズム</label>
-      <div class="inline">
-        <input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="v">
-        <span class="unit">Δ</span>
-        <div class="seg" data-k="vb"><button data-v="BU" class="on">BU</button><button data-v="BD">BD</button></div>
-      </div>
-    </div>
-    <div class="result">
-      <svg viewBox="-60 -60 120 120"></svg>
-      <div class="vals">
-        <div class="meta">合成プリズム</div>
-        <div class="big out-p">— <small>Δ</small></div>
-        <div class="meta">基底方向</div>
-        <div class="big out-a">—</div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<template id="splitTpl">
-  <div class="card">
-    <h2><span class="badge"></span><span class="ttl"></span></h2>
-    <div class="row">
-      <label>合成プリズム量</label>
-      <div class="inline">
-        <input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="p">
-        <span class="unit">Δ</span>
-      </div>
-    </div>
-    <div class="row">
-      <label>基底方向（0〜360°）</label>
-      <div class="inline">
-        <input type="number" inputmode="decimal" step="1" min="0" max="360" placeholder="0" data-k="a">
-        <span class="unit">°</span>
-      </div>
-    </div>
-    <div class="result">
-      <svg viewBox="-60 -60 120 120"></svg>
-      <div class="vals">
-        <div class="meta">水平</div>
-        <div class="big out-h">—</div>
-        <div class="meta">垂直</div>
-        <div class="big out-v">—</div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
-const EYES = [
-  { id: 'R', name: '右眼（R）', nasalRight: true },
-  { id: 'L', name: '左眼（L）', nasalRight: false },
-];
-const STORE = 'prism-calc-v1';
-const num = el => { const v = parseFloat(el.value); return isFinite(v) && v > 0 ? v : 0; };
-const f2 = v => (Math.round(v * 100) / 100).toFixed(2);
+(function () {
+  var EYES = [
+    { id: 'R', name: '右眼', nasalRight: true,  color: '#c0392b' },
+    { id: 'L', name: '左眼', nasalRight: false, color: '#1f6fb5' }
+  ];
+  var STORE = 'prism-calc-v2';
 
-// SVG: 検者側から見たレンズ。右眼は鼻側が画面右、左眼は鼻側が画面左
-function drawLens(svg, eye, p, deg) {
-  const nasalX = eye.nasalRight ? 1 : -1;
-  const color = eye.id === 'R' ? 'var(--r)' : 'var(--l)';
-  let s = `<circle r="44" fill="#fff" stroke="#9aa6b2" stroke-width="1.5"/>
-    <line x1="-44" y1="0" x2="44" y2="0" stroke="#d6dce3"/><line x1="0" y1="-44" x2="0" y2="44" stroke="#d6dce3"/>
-    <text x="0" y="-48" font-size="9" text-anchor="middle" fill="#66727f">上 90°</text>
-    <text x="0" y="57" font-size="9" text-anchor="middle" fill="#66727f">下 270°</text>
-    <text x="${nasalX * 52}" y="3" font-size="9" text-anchor="middle" fill="#66727f">鼻</text>
-    <text x="${-nasalX * 52}" y="3" font-size="9" text-anchor="middle" fill="#66727f">耳</text>`;
-  if (p > 0) {
-    const r = deg * Math.PI / 180, L = 38;
-    const x = Math.cos(r) * L, y = -Math.sin(r) * L;
-    const ang = Math.atan2(y, x);
-    const hx = x - Math.cos(ang - 0.45) * 9, hy = y - Math.sin(ang - 0.45) * 9;
-    const kx = x - Math.cos(ang + 0.45) * 9, ky = y - Math.sin(ang + 0.45) * 9;
-    s += `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
-      <polygon points="${x},${y} ${hx},${hy} ${kx},${ky}" fill="${color}"/>`;
-  }
-  s += `<circle r="2.5" fill="#1d2733"/>`;
-  svg.innerHTML = s;
-}
+  function f2(v) { return (Math.round(v * 100) / 100).toFixed(2); }
+  function num(el) { var v = parseFloat(el.value); return isFinite(v) && v > 0 ? v : 0; }
 
-const ui = {};
-function build(tplId, rootId, prefix) {
-  const root = document.getElementById(rootId);
-  const tpl = document.getElementById(tplId);
-  EYES.forEach(eye => {
-    const node = tpl.content.firstElementChild.cloneNode(true);
-    node.classList.add(eye.id);
-    node.querySelector('.badge').textContent = eye.id;
-    node.querySelector('.ttl').textContent = eye.name;
-    root.appendChild(node);
-    ui[prefix + eye.id] = node;
-    node.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
-      b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
-      update();
-    }));
-    node.querySelectorAll('input').forEach(i => i.addEventListener('input', update));
-  });
-}
-build('eyeTpl', 'eyes', 'c');
-build('splitTpl', 'eyes2', 's');
+  // 各眼のカードを作成
+  EYES.forEach(function (eye) {
+    var c = document.getElementById(eye.id);
+    c.innerHTML =
+      '<h2><span class="badge">' + eye.id + '</span>' + eye.name + '</h2>' +
+      '<div class="row"><label>水平プリズム（X軸）</label><div class="inline">' +
+        '<input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="h">' +
+        '<span class="unit">Δ</span>' +
+        '<div class="seg" data-k="hb"><button type="button" data-v="BI" class="on">BI</button><button type="button" data-v="BO">BO</button></div>' +
+      '</div></div>' +
+      '<div class="row"><label>垂直プリズム（Y軸）</label><div class="inline">' +
+        '<input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="v">' +
+        '<span class="unit">Δ</span>' +
+        '<div class="seg" data-k="vb"><button type="button" data-v="BU" class="on">BU</button><button type="button" data-v="BD">BD</button></div>' +
+      '</div></div>' +
+      '<svg class="graph" viewBox="0 0 300 300"></svg>' +
+      '<div class="res"><table>' +
+        '<tr><td>水平 X</td><td class="oX">—</td></tr>' +
+        '<tr><td>垂直 Y</td><td class="oY">—</td></tr>' +
+        '<tr class="sum"><td>合成値</td><td class="oP">—</td></tr>' +
+        '<tr><td>基底方向</td><td class="oA">—</td></tr>' +
+      '</table></div>';
 
-const seg = (node, k) => node.querySelector(`.seg[data-k="${k}"] .on`).dataset.v;
-const inp = (node, k) => node.querySelector(`input[data-k="${k}"]`);
-
-function update() {
-  let totalBI = 0, relV = 0, any = false; // relV: 右眼BU方向を正
-  EYES.forEach(eye => {
-    const n = ui['c' + eye.id];
-    const h = num(inp(n, 'h')), v = num(inp(n, 'v'));
-    const hb = seg(n, 'hb'), vb = seg(n, 'vb');
-    const hBI = hb === 'BI' ? h : -h;          // BI を正
-    const vBU = vb === 'BU' ? v : -v;          // BU を正
-    const x = eye.nasalRight ? hBI : -hBI;     // 画面右を正
-    const y = vBU;
-    const p = Math.hypot(x, y);
-    let deg = Math.atan2(y, x) * 180 / Math.PI;
-    if (deg < 0) deg += 360;
-    deg = Math.round(deg) % 360;
-    n.querySelector('.out-p').innerHTML = (p > 0 ? f2(p) : '—') + ' <small>Δ</small>';
-    n.querySelector('.out-a').textContent = p > 0 ? `${deg}°` : '—';
-    drawLens(n.querySelector('svg'), eye, p, deg);
-    totalBI += hBI;
-    relV += eye.id === 'R' ? vBU : -vBU;
-    if (h || v) any = true;
-  });
-  document.getElementById('tH').textContent = !any ? '—'
-    : Math.abs(totalBI) < 1e-9 ? '0.00Δ' : `${f2(Math.abs(totalBI))}Δ ${totalBI > 0 ? 'BI' : 'BO'}`;
-  document.getElementById('tV').textContent = !any ? '—'
-    : Math.abs(relV) < 1e-9 ? '0.00Δ'
-    : relV > 0 ? `${f2(relV)}Δ（右BU / 左BD 相当）` : `${f2(-relV)}Δ（右BD / 左BU 相当）`;
-
-  // 分解
-  EYES.forEach(eye => {
-    const n = ui['s' + eye.id];
-    const p = num(inp(n, 'p'));
-    let a = parseFloat(inp(n, 'a').value); if (!isFinite(a)) a = 0;
-    a = ((a % 360) + 360) % 360;
-    const x = p * Math.cos(a * Math.PI / 180), y = p * Math.sin(a * Math.PI / 180);
-    const hBI = eye.nasalRight ? x : -x;
-    const hTxt = Math.abs(hBI) < 0.005 ? '0.00Δ' : `${f2(Math.abs(hBI))}Δ ${hBI > 0 ? 'BI' : 'BO'}`;
-    const vTxt = Math.abs(y) < 0.005 ? '0.00Δ' : `${f2(Math.abs(y))}Δ ${y > 0 ? 'BU' : 'BD'}`;
-    n.querySelector('.out-h').textContent = p > 0 ? hTxt : '—';
-    n.querySelector('.out-v').textContent = p > 0 ? vTxt : '—';
-    drawLens(n.querySelector('svg'), eye, p, a);
-  });
-  save();
-}
-
-function save() {
-  const d = {};
-  Object.entries(ui).forEach(([k, n]) => {
-    d[k] = {};
-    n.querySelectorAll('input').forEach(i => d[k][i.dataset.k] = i.value);
-    n.querySelectorAll('.seg').forEach(s => d[k][s.dataset.k] = s.querySelector('.on').dataset.v);
-  });
-  try { localStorage.setItem(STORE, JSON.stringify(d)); } catch (e) {}
-}
-function load() {
-  let d; try { d = JSON.parse(localStorage.getItem(STORE)); } catch (e) {}
-  if (!d) return;
-  Object.entries(ui).forEach(([k, n]) => {
-    if (!d[k]) return;
-    n.querySelectorAll('input').forEach(i => i.value = d[k][i.dataset.k] || '');
-    n.querySelectorAll('.seg').forEach(s => {
-      const v = d[k][s.dataset.k];
-      s.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-      if (!s.querySelector('.on')) s.querySelector('button').classList.add('on');
+    c.querySelectorAll('.seg button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        b.parentNode.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        update();
+      });
     });
+    c.querySelectorAll('input').forEach(function (i) { i.addEventListener('input', update); });
   });
-}
 
-document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
-  document.getElementById('compose').classList.toggle('hidden', b.dataset.tab !== 'compose');
-  document.getElementById('split').classList.toggle('hidden', b.dataset.tab !== 'split');
-}));
-document.getElementById('clear').addEventListener('click', () => {
-  if (!confirm('入力をすべてクリアしますか？')) return;
-  document.querySelectorAll('input').forEach(i => i.value = '');
-  document.querySelectorAll('.seg').forEach(s =>
-    s.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === 0)));
+  function get(eye) {
+    var c = document.getElementById(eye.id);
+    return {
+      c: c,
+      h: num(c.querySelector('input[data-k="h"]')),
+      v: num(c.querySelector('input[data-k="v"]')),
+      hb: c.querySelector('.seg[data-k="hb"] .on').getAttribute('data-v'),
+      vb: c.querySelector('.seg[data-k="vb"] .on').getAttribute('data-v')
+    };
+  }
+
+  // X/Y グラフ描画
+  function draw(svg, eye, x, y, p) {
+    var C = 150, R = 120;
+    var maxV = Math.max(4, Math.ceil(Math.max(Math.abs(x), Math.abs(y))));
+    var sc = R / maxV;
+    var right = eye.nasalRight ? 'BI' : 'BO';
+    var left  = eye.nasalRight ? 'BO' : 'BI';
+    var s = '';
+    // 目盛り
+    var step = maxV > 10 ? 2 : 1;
+    for (var i = -maxV; i <= maxV; i += step) {
+      var g = C + i * sc;
+      s += '<line x1="' + g + '" y1="' + (C - R) + '" x2="' + g + '" y2="' + (C + R) + '" stroke="#eef1f4"/>';
+      s += '<line x1="' + (C - R) + '" y1="' + g + '" x2="' + (C + R) + '" y2="' + g + '" stroke="#eef1f4"/>';
+      if (i !== 0) {
+        s += '<text x="' + g + '" y="' + (C + 12) + '" font-size="8" fill="#9aa6b2" text-anchor="middle">' + Math.abs(i) + '</text>';
+        s += '<text x="' + (C - 4) + '" y="' + (C - i * sc + 3) + '" font-size="8" fill="#9aa6b2" text-anchor="end">' + Math.abs(i) + '</text>';
+      }
+    }
+    // 軸
+    s += '<line x1="' + (C - R - 8) + '" y1="' + C + '" x2="' + (C + R + 8) + '" y2="' + C + '" stroke="#5b6773" stroke-width="1.5"/>';
+    s += '<line x1="' + C + '" y1="' + (C - R - 8) + '" x2="' + C + '" y2="' + (C + R + 8) + '" stroke="#5b6773" stroke-width="1.5"/>';
+    s += '<text x="' + (C + R + 6) + '" y="' + (C - 6) + '" font-size="12" font-weight="700" fill="#1d2733" text-anchor="end">' + right + '</text>';
+    s += '<text x="' + (C - R - 6) + '" y="' + (C - 6) + '" font-size="12" font-weight="700" fill="#1d2733">' + left + '</text>';
+    s += '<text x="' + (C + 6) + '" y="' + (C - R - 2) + '" font-size="12" font-weight="700" fill="#1d2733">BU</text>';
+    s += '<text x="' + (C + 6) + '" y="' + (C + R + 6) + '" font-size="12" font-weight="700" fill="#1d2733">BD</text>';
+    s += '<text x="' + (eye.nasalRight ? C + R : C - R) + '" y="' + (C + 26) + '" font-size="9" fill="#66727f" text-anchor="' + (eye.nasalRight ? 'end' : 'start') + '">（鼻側）</text>';
+
+    if (p > 0) {
+      var px = C + x * sc, py = C - y * sc;
+      // X・Y 成分
+      s += '<line x1="' + C + '" y1="' + C + '" x2="' + px + '" y2="' + C + '" stroke="#2e8b57" stroke-width="4" stroke-linecap="round"/>';
+      s += '<line x1="' + px + '" y1="' + C + '" x2="' + px + '" y2="' + py + '" stroke="#d68910" stroke-width="4" stroke-linecap="round"/>';
+      s += '<line x1="' + C + '" y1="' + py + '" x2="' + px + '" y2="' + py + '" stroke="#999" stroke-dasharray="4 3"/>';
+      // 合成ベクトル
+      var ang = Math.atan2(py - C, px - C);
+      var ax1 = px - Math.cos(ang - 0.4) * 11, ay1 = py - Math.sin(ang - 0.4) * 11;
+      var ax2 = px - Math.cos(ang + 0.4) * 11, ay2 = py - Math.sin(ang + 0.4) * 11;
+      s += '<line x1="' + C + '" y1="' + C + '" x2="' + px + '" y2="' + py + '" stroke="' + eye.color + '" stroke-width="3.5" stroke-linecap="round"/>';
+      s += '<polygon points="' + px + ',' + py + ' ' + ax1 + ',' + ay1 + ' ' + ax2 + ',' + ay2 + '" fill="' + eye.color + '"/>';
+      s += '<circle cx="' + px + '" cy="' + py + '" r="4" fill="' + eye.color + '"/>';
+    }
+    s += '<circle cx="' + C + '" cy="' + C + '" r="3" fill="#1d2733"/>';
+    svg.innerHTML = s;
+  }
+
+  function update() {
+    var totalBI = 0, relV = 0, any = false;
+    EYES.forEach(function (eye) {
+      var d = get(eye);
+      var hBI = d.hb === 'BI' ? d.h : -d.h;       // BIを正
+      var vBU = d.vb === 'BU' ? d.v : -d.v;       // BUを正
+      var x = eye.nasalRight ? hBI : -hBI;        // 画面右を正
+      var y = vBU;
+      var p = Math.sqrt(x * x + y * y);
+      var deg = Math.atan2(y, x) * 180 / Math.PI;
+      if (deg < 0) deg += 360;
+      deg = Math.round(deg) % 360;
+
+      d.c.querySelector('.oX').textContent = d.h > 0 ? f2(d.h) + 'Δ ' + d.hb : '0.00Δ';
+      d.c.querySelector('.oY').textContent = d.v > 0 ? f2(d.v) + 'Δ ' + d.vb : '0.00Δ';
+      d.c.querySelector('.oP').textContent = p > 0 ? f2(p) + 'Δ' : '—';
+      d.c.querySelector('.oA').textContent = p > 0 ? deg + '°' : '—';
+      draw(d.c.querySelector('svg'), eye, x, y, p);
+
+      totalBI += hBI;
+      relV += eye.id === 'R' ? vBU : -vBU;
+      if (d.h || d.v) any = true;
+    });
+    document.getElementById('tH').textContent = !any ? '—'
+      : Math.abs(totalBI) < 1e-9 ? '0.00Δ' : f2(Math.abs(totalBI)) + 'Δ ' + (totalBI > 0 ? 'BI' : 'BO');
+    document.getElementById('tV').textContent = !any ? '—'
+      : Math.abs(relV) < 1e-9 ? '0.00Δ'
+      : relV > 0 ? f2(relV) + 'Δ（右BU／左BD）' : f2(-relV) + 'Δ（右BD／左BU）';
+    save();
+  }
+
+  function save() {
+    var data = {};
+    EYES.forEach(function (eye) {
+      var c = document.getElementById(eye.id);
+      data[eye.id] = {
+        h: c.querySelector('input[data-k="h"]').value,
+        v: c.querySelector('input[data-k="v"]').value,
+        hb: c.querySelector('.seg[data-k="hb"] .on').getAttribute('data-v'),
+        vb: c.querySelector('.seg[data-k="vb"] .on').getAttribute('data-v')
+      };
+    });
+    try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) {}
+  }
+
+  function setSeg(c, k, v) {
+    var btns = c.querySelectorAll('.seg[data-k="' + k + '"] button');
+    var found = false;
+    btns.forEach(function (b) { var on = b.getAttribute('data-v') === v; b.classList.toggle('on', on); if (on) found = true; });
+    if (!found) btns[0].classList.add('on');
+  }
+
+  function load() {
+    var data = null;
+    try { data = JSON.parse(localStorage.getItem(STORE)); } catch (e) {}
+    if (!data) return;
+    EYES.forEach(function (eye) {
+      var d = data[eye.id]; if (!d) return;
+      var c = document.getElementById(eye.id);
+      c.querySelector('input[data-k="h"]').value = d.h || '';
+      c.querySelector('input[data-k="v"]').value = d.v || '';
+      setSeg(c, 'hb', d.hb);
+      setSeg(c, 'vb', d.vb);
+    });
+  }
+
+  document.getElementById('clear').addEventListener('click', function () {
+    if (!confirm('入力をすべてクリアしますか？')) return;
+    EYES.forEach(function (eye) {
+      var c = document.getElementById(eye.id);
+      c.querySelectorAll('input').forEach(function (i) { i.value = ''; });
+      setSeg(c, 'hb', 'BI');
+      setSeg(c, 'vb', 'BU');
+    });
+    update();
+  });
+
+  load();
   update();
-});
-
-load();
-update();
+})();
 </script>
 </body>
 </html>
