@@ -74,6 +74,7 @@
   .res td { padding: 4px 2px; font-size: 15px; }
   .res td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
   .res tr.sum td { border-top: 1px solid var(--soft-line); padding-top: 8px; font-size: 20px; }
+  .res tr.near td { font-size: 18px; color: var(--accent); }
   .total table { width: 100%; border-collapse: collapse; }
   .total td { padding: 8px 2px; border-bottom: 1px solid var(--line); }
   .total td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -135,6 +136,7 @@
         '<tr><td>水平 X</td><td class="oX">—</td></tr>' +
         '<tr><td>垂直 Y</td><td class="oY">—</td></tr>' +
         '<tr class="sum"><td>合成値</td><td class="oP">—</td></tr>' +
+        '<tr class="near"><td>近似値（0.25刻み）</td><td class="oN">—</td></tr>' +
         '<tr><td>基底方向</td><td class="oA">—</td></tr>' +
       '</table></div>';
 
@@ -229,6 +231,9 @@
       d.c.querySelector('.oX').textContent = d.h > 0 ? f2(d.h) + 'Δ ' + d.hb : '0.00Δ';
       d.c.querySelector('.oY').textContent = d.v > 0 ? f2(d.v) + 'Δ ' + d.vb : '0.00Δ';
       d.c.querySelector('.oP').textContent = p > 0 ? f2(p) + 'Δ' : '—';
+      // 0.25Δ刻みの近似値（四捨五入）。誤差を避けるため小数第4位で丸めてから計算
+      var near = Math.round(Math.round(p * 10000) / 10000 * 4) / 4;
+      d.c.querySelector('.oN').textContent = p > 0 ? f2(near) + 'Δ' : '—';
       d.c.querySelector('.oA').textContent = p > 0 ? deg + '°' : '—';
       draw(d.c.querySelector('svg'), eye, x, y, p);
 
