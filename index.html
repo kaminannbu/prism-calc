@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4e79">
+<title>プリズム合成計算</title>
+<style>
+  :root {
+    --bg: #f3f5f8; --card: #fff; --text: #1d2733; --sub: #66727f;
+    --line: #d6dce3; --accent: #1f4e79; --accent-soft: #e3edf7;
+    --r: #c0392b; --l: #1f6fb5;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
+    font-size: 16px;
+  }
+  header {
+    background: var(--accent); color: #fff; padding: 14px 16px;
+    padding-top: calc(14px + env(safe-area-inset-top));
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header button {
+    background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.4);
+    border-radius: 8px; padding: 6px 12px; font-size: 14px;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 12px 12px 40px; }
+  .eyes { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 700px) { .eyes { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .card h2 { margin: 0 0 10px; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  .badge { color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 14px; }
+  .R .badge { background: var(--r); } .L .badge { background: var(--l); }
+  .row { margin-bottom: 12px; }
+  .row label { display: block; font-size: 13px; color: var(--sub); margin-bottom: 4px; }
+  .inline { display: flex; gap: 8px; align-items: stretch; }
+  input[type=number] {
+    flex: 1; min-width: 0; font-size: 22px; padding: 8px 10px; text-align: right;
+    border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--text);
+  }
+  input[type=number]:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .unit { align-self: center; color: var(--sub); }
+  .seg { display: flex; border: 1px solid var(--accent); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: 0; background: #fff; color: var(--accent); font-size: 15px; font-weight: 600;
+    padding: 0 14px; min-width: 56px;
+  }
+  .seg button + button { border-left: 1px solid var(--accent); }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .result {
+    display: flex; gap: 12px; align-items: center; background: var(--accent-soft);
+    border-radius: 10px; padding: 10px;
+  }
+  .result svg { flex: 0 0 120px; width: 120px; height: 120px; }
+  .result .vals { flex: 1; }
+  .big { font-size: 28px; font-weight: 700; }
+  .big small { font-size: 16px; font-weight: 500; }
+  .meta { font-size: 14px; color: var(--sub); margin-top: 2px; }
+  .total { margin-top: 12px; }
+  .total table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .total td { padding: 8px 4px; border-bottom: 1px solid var(--line); }
+  .total td:last-child { text-align: right; font-weight: 600; }
+  .note { font-size: 12px; color: var(--sub); margin-top: 10px; line-height: 1.6; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tabs button {
+    flex: 1; padding: 10px; font-size: 15px; border-radius: 8px; border: 1px solid var(--accent);
+    background: #fff; color: var(--accent); font-weight: 600;
+  }
+  .tabs button.on { background: var(--accent); color: #fff; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>プリズム合成計算</h1>
+  <button id="clear">クリア</button>
+</header>
+<main>
+  <div class="tabs">
+    <button data-tab="compose" class="on">合成（水平＋垂直）</button>
+    <button data-tab="split">分解（合成→水平・垂直）</button>
+  </div>
+
+  <section id="compose">
+    <div class="eyes" id="eyes"></div>
+    <div class="card total">
+      <h2>両眼の合計</h2>
+      <table>
+        <tr><td>水平（両眼合計）</td><td id="tH">—</td></tr>
+        <tr><td>垂直（上下差）</td><td id="tV">—</td></tr>
+      </table>
+      <div class="note">
+        基底方向は 360°表記（検者側から見て、右方向 0°・反時計回り）。<br>
+        右眼：BI=0° / BU=90° / BO=180° / BD=270°　左眼：BO=0° / BU=90° / BI=180° / BD=270°<br>
+        垂直の上下差は「右BU＝左BD」として合算しています。
+      </div>
+    </div>
+  </section>
+
+  <section id="split" class="hidden">
+    <div class="eyes" id="eyes2"></div>
+    <div class="card"><div class="note">合成プリズム量と基底方向（360°表記）から、水平・垂直の成分に分けます。</div></div>
+  </section>
+</main>
+
+<template id="eyeTpl">
+  <div class="card">
+    <h2><span class="badge"></span><span class="ttl"></span></h2>
+    <div class="row">
+      <label>水平プリズム</label>
+      <div class="inline">
+        <input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="h">
+        <span class="unit">Δ</span>
+        <div class="seg" data-k="hb"><button data-v="BI" class="on">BI</button><button data-v="BO">BO</button></div>
+      </div>
+    </div>
+    <div class="row">
+      <label>垂直プリズム</label>
+      <div class="inline">
+        <input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="v">
+        <span class="unit">Δ</span>
+        <div class="seg" data-k="vb"><button data-v="BU" class="on">BU</button><button data-v="BD">BD</button></div>
+      </div>
+    </div>
+    <div class="result">
+      <svg viewBox="-60 -60 120 120"></svg>
+      <div class="vals">
+        <div class="meta">合成プリズム</div>
+        <div class="big out-p">— <small>Δ</small></div>
+        <div class="meta">基底方向</div>
+        <div class="big out-a">—</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="splitTpl">
+  <div class="card">
+    <h2><span class="badge"></span><span class="ttl"></span></h2>
+    <div class="row">
+      <label>合成プリズム量</label>
+      <div class="inline">
+        <input type="number" inputmode="decimal" step="0.25" min="0" placeholder="0.00" data-k="p">
+        <span class="unit">Δ</span>
+      </div>
+    </div>
+    <div class="row">
+      <label>基底方向（0〜360°）</label>
+      <div class="inline">
+        <input type="number" inputmode="decimal" step="1" min="0" max="360" placeholder="0" data-k="a">
+        <span class="unit">°</span>
+      </div>
+    </div>
+    <div class="result">
+      <svg viewBox="-60 -60 120 120"></svg>
+      <div class="vals">
+        <div class="meta">水平</div>
+        <div class="big out-h">—</div>
+        <div class="meta">垂直</div>
+        <div class="big out-v">—</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+const EYES = [
+  { id: 'R', name: '右眼（R）', nasalRight: true },
+  { id: 'L', name: '左眼（L）', nasalRight: false },
+];
+const STORE = 'prism-calc-v1';
+const num = el => { const v = parseFloat(el.value); return isFinite(v) && v > 0 ? v : 0; };
+const f2 = v => (Math.round(v * 100) / 100).toFixed(2);
+
+// SVG: 検者側から見たレンズ。右眼は鼻側が画面右、左眼は鼻側が画面左
+function drawLens(svg, eye, p, deg) {
+  const nasalX = eye.nasalRight ? 1 : -1;
+  const color = eye.id === 'R' ? 'var(--r)' : 'var(--l)';
+  let s = `<circle r="44" fill="#fff" stroke="#9aa6b2" stroke-width="1.5"/>
+    <line x1="-44" y1="0" x2="44" y2="0" stroke="#d6dce3"/><line x1="0" y1="-44" x2="0" y2="44" stroke="#d6dce3"/>
+    <text x="0" y="-48" font-size="9" text-anchor="middle" fill="#66727f">上 90°</text>
+    <text x="0" y="57" font-size="9" text-anchor="middle" fill="#66727f">下 270°</text>
+    <text x="${nasalX * 52}" y="3" font-size="9" text-anchor="middle" fill="#66727f">鼻</text>
+    <text x="${-nasalX * 52}" y="3" font-size="9" text-anchor="middle" fill="#66727f">耳</text>`;
+  if (p > 0) {
+    const r = deg * Math.PI / 180, L = 38;
+    const x = Math.cos(r) * L, y = -Math.sin(r) * L;
+    const ang = Math.atan2(y, x);
+    const hx = x - Math.cos(ang - 0.45) * 9, hy = y - Math.sin(ang - 0.45) * 9;
+    const kx = x - Math.cos(ang + 0.45) * 9, ky = y - Math.sin(ang + 0.45) * 9;
+    s += `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="${x},${y} ${hx},${hy} ${kx},${ky}" fill="${color}"/>`;
+  }
+  s += `<circle r="2.5" fill="#1d2733"/>`;
+  svg.innerHTML = s;
+}
+
+const ui = {};
+function build(tplId, rootId, prefix) {
+  const root = document.getElementById(rootId);
+  const tpl = document.getElementById(tplId);
+  EYES.forEach(eye => {
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    node.classList.add(eye.id);
+    node.querySelector('.badge').textContent = eye.id;
+    node.querySelector('.ttl').textContent = eye.name;
+    root.appendChild(node);
+    ui[prefix + eye.id] = node;
+    node.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+      b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      update();
+    }));
+    node.querySelectorAll('input').forEach(i => i.addEventListener('input', update));
+  });
+}
+build('eyeTpl', 'eyes', 'c');
+build('splitTpl', 'eyes2', 's');
+
+const seg = (node, k) => node.querySelector(`.seg[data-k="${k}"] .on`).dataset.v;
+const inp = (node, k) => node.querySelector(`input[data-k="${k}"]`);
+
+function update() {
+  let totalBI = 0, relV = 0, any = false; // relV: 右眼BU方向を正
+  EYES.forEach(eye => {
+    const n = ui['c' + eye.id];
+    const h = num(inp(n, 'h')), v = num(inp(n, 'v'));
+    const hb = seg(n, 'hb'), vb = seg(n, 'vb');
+    const hBI = hb === 'BI' ? h : -h;          // BI を正
+    const vBU = vb === 'BU' ? v : -v;          // BU を正
+    const x = eye.nasalRight ? hBI : -hBI;     // 画面右を正
+    const y = vBU;
+    const p = Math.hypot(x, y);
+    let deg = Math.atan2(y, x) * 180 / Math.PI;
+    if (deg < 0) deg += 360;
+    deg = Math.round(deg) % 360;
+    n.querySelector('.out-p').innerHTML = (p > 0 ? f2(p) : '—') + ' <small>Δ</small>';
+    n.querySelector('.out-a').textContent = p > 0 ? `${deg}°` : '—';
+    drawLens(n.querySelector('svg'), eye, p, deg);
+    totalBI += hBI;
+    relV += eye.id === 'R' ? vBU : -vBU;
+    if (h || v) any = true;
+  });
+  document.getElementById('tH').textContent = !any ? '—'
+    : Math.abs(totalBI) < 1e-9 ? '0.00Δ' : `${f2(Math.abs(totalBI))}Δ ${totalBI > 0 ? 'BI' : 'BO'}`;
+  document.getElementById('tV').textContent = !any ? '—'
+    : Math.abs(relV) < 1e-9 ? '0.00Δ'
+    : relV > 0 ? `${f2(relV)}Δ（右BU / 左BD 相当）` : `${f2(-relV)}Δ（右BD / 左BU 相当）`;
+
+  // 分解
+  EYES.forEach(eye => {
+    const n = ui['s' + eye.id];
+    const p = num(inp(n, 'p'));
+    let a = parseFloat(inp(n, 'a').value); if (!isFinite(a)) a = 0;
+    a = ((a % 360) + 360) % 360;
+    const x = p * Math.cos(a * Math.PI / 180), y = p * Math.sin(a * Math.PI / 180);
+    const hBI = eye.nasalRight ? x : -x;
+    const hTxt = Math.abs(hBI) < 0.005 ? '0.00Δ' : `${f2(Math.abs(hBI))}Δ ${hBI > 0 ? 'BI' : 'BO'}`;
+    const vTxt = Math.abs(y) < 0.005 ? '0.00Δ' : `${f2(Math.abs(y))}Δ ${y > 0 ? 'BU' : 'BD'}`;
+    n.querySelector('.out-h').textContent = p > 0 ? hTxt : '—';
+    n.querySelector('.out-v').textContent = p > 0 ? vTxt : '—';
+    drawLens(n.querySelector('svg'), eye, p, a);
+  });
+  save();
+}
+
+function save() {
+  const d = {};
+  Object.entries(ui).forEach(([k, n]) => {
+    d[k] = {};
+    n.querySelectorAll('input').forEach(i => d[k][i.dataset.k] = i.value);
+    n.querySelectorAll('.seg').forEach(s => d[k][s.dataset.k] = s.querySelector('.on').dataset.v);
+  });
+  try { localStorage.setItem(STORE, JSON.stringify(d)); } catch (e) {}
+}
+function load() {
+  let d; try { d = JSON.parse(localStorage.getItem(STORE)); } catch (e) {}
+  if (!d) return;
+  Object.entries(ui).forEach(([k, n]) => {
+    if (!d[k]) return;
+    n.querySelectorAll('input').forEach(i => i.value = d[k][i.dataset.k] || '');
+    n.querySelectorAll('.seg').forEach(s => {
+      const v = d[k][s.dataset.k];
+      s.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+      if (!s.querySelector('.on')) s.querySelector('button').classList.add('on');
+    });
+  });
+}
+
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.getElementById('compose').classList.toggle('hidden', b.dataset.tab !== 'compose');
+  document.getElementById('split').classList.toggle('hidden', b.dataset.tab !== 'split');
+}));
+document.getElementById('clear').addEventListener('click', () => {
+  if (!confirm('入力をすべてクリアしますか？')) return;
+  document.querySelectorAll('input').forEach(i => i.value = '');
+  document.querySelectorAll('.seg').forEach(s =>
+    s.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === 0)));
+  update();
+});
+
+load();
+update();
+</script>
+</body>
+</html>
